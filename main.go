@@ -114,41 +114,41 @@ func getUser(s string) (User, error) {
 		key := splitN[0]
 		value := splitN[1]
 
-		switch {
-		case strings.Contains(key, "color"):
+		switch key {
+		case "color":
 			if value == "" {
 				user.Color = defaultColor
 			} else {
 				user.Color = value
 			}
-		case strings.Contains(key, "user-type"), strings.Contains(key, "vip"):
+		case "user-type", "vip":
 			if value == "" {
 				continue
 			}
 
-			username, message, err := parseUserMessage(value)
+			message, err := parseUserMessage(value)
 			if err != nil {
 				return User{}, fmt.Errorf("fehler beim Parsen der Nachricht: %w", err)
 			}
 
-			user.Username = username
 			user.Message = message
+		case "display-name":
+			user.Username = value
 		}
 	}
 
 	return user, nil
 }
 
-func parseUserMessage(s string) (string, string, error) {
+func parseUserMessage(s string) (string, error) {
 	splits := strings.SplitN(s, ":", 2)
 	if len(splits) != 2 {
-		return "", "", fmt.Errorf("failed to parse user message: %s", s)
+		return "", fmt.Errorf("failed to parse user message: %s", s)
 	}
 
-	username := strings.Split(splits[1], "!")[0]
 	message := strings.SplitN(splits[1], " ", 4)[3][1:]
 
-	return username, message, nil
+	return message, nil
 }
 
 func colorize(text string, hexColor string) string {
